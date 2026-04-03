@@ -1,4 +1,5 @@
-import { ForecastData, ForecastItem } from "@/types/weather";
+import { ForecastData } from "@/types/weather";
+import { groupForecastByDay } from "@/utils/weatherHelpers";
 import { 
   Cloud, 
   CloudDrizzle, 
@@ -13,43 +14,9 @@ interface ForecastDisplayProps {
 }
 
 export function ForecastDisplay({ data }: ForecastDisplayProps) {
-  // Group forecast by day
-  const dailyForecasts: Record<string, ForecastItem[]> = {};
+  const upcomingDays = groupForecastByDay(data);
 
-  if (!data || !data.list) return null;
-
-  data.list.forEach((item) => {
-    const date = new Date(item.dt * 1000);
-    // Use local string to ensure consistent grouping
-    const dateKey = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-    if (!dailyForecasts[dateKey]) {
-      dailyForecasts[dateKey] = [];
-    }
-    dailyForecasts[dateKey].push(item);
-  });
-
-  // Extract the next 5 unique days
-  const upcomingDays = Object.entries(dailyForecasts)
-    .slice(0, 5)
-    .map(([dateKey, items]) => {
-      // Find min and max temp for the day
-      const temps = items.map(item => item.main.temp);
-      const minTemp = Math.round(Math.min(...temps));
-      const maxTemp = Math.round(Math.max(...temps));
-
-      // Find the most prominent weather condition (e.g. by picking the condition at 12:00 PM if available, or just the first item)
-      const midDayItem = items.find(i => {
-        const h = new Date(i.dt * 1000).getHours();
-        return h >= 11 && h <= 15;
-      }) || items[Math.floor(items.length / 2)];
-
-      return {
-        dateKey,
-        minTemp,
-        maxTemp,
-        weather: midDayItem.weather[0]
-      };
-    });
+  if (!upcomingDays.length) return null;
 
   const getWeatherIcon = (id: number, className: string) => {
     if (id >= 200 && id < 300) return <CloudLightning className={className} />;

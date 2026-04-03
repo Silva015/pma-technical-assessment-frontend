@@ -35,14 +35,19 @@ export async function GET(request: Request) {
     };
   };
 
+  const cacheHeaders = {
+    "Cache-Control": "public, s-maxage=600, stale-while-revalidate=30",
+  };
+
   // 1. Direct coordinate search (Geolocation)
   if (lat && lon) {
     try {
       const data = await fetchCombinedData(`lat=${lat}&lon=${lon}`);
-      return NextResponse.json(data);
-    } catch (error: any) {
+      return NextResponse.json(data, { headers: cacheHeaders });
+    } catch (error: unknown) {
       console.error("Error fetching weather by coords:", error);
-      return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+      const errorMessage = error instanceof Error ? error.message : "Internal Server Error";
+      return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
   }
 
@@ -52,7 +57,7 @@ export async function GET(request: Request) {
       // Try OpenWeatherMap direct geographic search first
       try {
         const data = await fetchCombinedData(`q=${encodeURIComponent(q)}`);
-        return NextResponse.json(data);
+        return NextResponse.json(data, { headers: cacheHeaders });
       } catch (directError) {
         // Continue to fallback if direct fetch fails
       }
@@ -79,16 +84,17 @@ export async function GET(request: Request) {
             fallbackData.current.sys.country = ""; 
           }
           
-          return NextResponse.json(fallbackData);
+          return NextResponse.json(fallbackData, { headers: cacheHeaders });
         }
       } catch (e) {
         console.warn("Geocoding failed, falling back to 404", e);
       }
 
       return NextResponse.json({ error: "Location not found" }, { status: 404 });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching weather by query:", error);
-      return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+      const errorMessage = error instanceof Error ? error.message : "Internal Server Error";
+      return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
   }
 

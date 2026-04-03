@@ -1,60 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useWeather } from "@/hooks/useWeather";
 import { SearchBar } from "@/components/weather/SearchBar";
 import { WeatherDisplay } from "@/components/weather/WeatherDisplay";
 import { ForecastDisplay } from "@/components/weather/ForecastDisplay";
-import { WeatherData, ForecastData } from "@/types/weather";
 import { CloudRain, AlertCircle, MapPinOff, CloudOff, RefreshCcw } from "lucide-react";
 
 export default function Home() {
-  const [weatherData, setWeatherData] = useState<{ current: WeatherData; forecast: ForecastData } | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [geolocating, setGeolocating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchWeather = async (url: string) => {
-    try {
-      setError(null);
-      const response = await fetch(url);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to fetch weather data");
-      }
-
-      setWeatherData(data);
-    } catch (err: any) {
-      setError(err.message);
-      setWeatherData(null);
-    }
-  };
-
-  const handleSearch = async (query: string) => {
-    setLoading(true);
-    await fetchWeather(`/api/weather?q=${encodeURIComponent(query)}`);
-    setLoading(false);
-  };
-
-  const handleGeolocation = () => {
-    if (!navigator.geolocation) {
-      setError("Geolocation is not supported by your browser");
-      return;
-    }
-
-    setGeolocating(true);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        await fetchWeather(`/api/weather?lat=${latitude}&lon=${longitude}`);
-        setGeolocating(false);
-      },
-      (geoError) => {
-        setGeolocating(false);
-        setError("Unable to retrieve your location. " + geoError.message);
-      }
-    );
-  };
+  const {
+    weatherData,
+    loading,
+    geolocating,
+    error,
+    handleSearch,
+    handleGeolocation,
+    clearError,
+  } = useWeather();
 
   return (
     <div className="flex flex-col min-h-screen bg-zinc-50 dark:bg-black font-sans selection:bg-blue-500/30">
@@ -118,7 +79,7 @@ export default function Home() {
               </p>
 
               <button 
-                onClick={() => setError(null)}
+                onClick={clearError}
                 className="inline-flex items-center justify-center gap-2 px-6 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium rounded-full transition-colors text-sm"
               >
                 <RefreshCcw className="w-4 h-4" />
