@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { SearchBar } from "../components/weather/SearchBar";
-import { WeatherDisplay } from "../components/weather/WeatherDisplay";
-import { ForecastDisplay } from "../components/weather/ForecastDisplay";
-import { WeatherData, ForecastData } from "../types/weather";
+import { SearchBar } from "@/components/weather/SearchBar";
+import { WeatherDisplay } from "@/components/weather/WeatherDisplay";
+import { ForecastDisplay } from "@/components/weather/ForecastDisplay";
+import { WeatherData, ForecastData } from "@/types/weather";
 import { CloudRain, AlertCircle, MapPinOff, CloudOff, RefreshCcw } from "lucide-react";
 
 export default function Home() {
@@ -130,9 +130,13 @@ export default function Home() {
 
         {/* Successful Data Display */}
         {weatherData && !loading && !geolocating && !error && (
-          <div className="w-full flex flex-col gap-6">
-            <WeatherDisplay data={weatherData.current} />
-            <ForecastDisplay data={weatherData.forecast} />
+          <div className="w-full max-w-5xl mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8 items-stretch justify-center mt-8">
+            <div className="w-full lg:flex-1 h-full">
+              <WeatherDisplay data={weatherData.current} />
+            </div>
+            <div className="w-full lg:flex-1 h-full">
+              <ForecastDisplay data={weatherData.forecast} />
+            </div>
           </div>
         )}
       </main>

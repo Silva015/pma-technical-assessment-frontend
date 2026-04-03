@@ -1,4 +1,4 @@
-import { ForecastData, ForecastItem } from "../../types/weather";
+import { ForecastData, ForecastItem } from "@/types/weather";
 import { 
   Cloud, 
   CloudDrizzle, 
@@ -63,7 +63,7 @@ export function ForecastDisplay({ data }: ForecastDisplayProps) {
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto mt-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-150">
+    <div className="w-full max-w-xl mx-auto animate-in fade-in slide-in-from-bottom-6 duration-700 delay-150">
       <div className="bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 rounded-3xl p-6 md:p-8 shadow-xl">
         <h3 className="text-xl font-bold text-zinc-800 dark:text-zinc-100 mb-6 flex items-center gap-2">
           5-Day Forecast

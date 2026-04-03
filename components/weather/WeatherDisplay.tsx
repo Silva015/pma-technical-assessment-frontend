@@ -1,6 +1,6 @@
 "use client";
 
-import { WeatherData } from "../../types/weather";
+import { WeatherData } from "@/types/weather";
 import { 
   Cloud, 
   CloudDrizzle, 
@@ -45,7 +45,7 @@ export function WeatherDisplay({ data }: WeatherDisplayProps) {
   const gradientClass = getTemperatureColor(main.temp);
 
   return (
-    <div className="w-full max-w-xl mx-auto mt-8 animate-in fade-in slide-in-from-bottom-4 duration-700 relative group">
+    <div className="w-full max-w-xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 relative group">
       <div className={`absolute inset-0 bg-gradient-to-br ${gradientClass} rounded-3xl blur-xl opacity-20 group-hover:opacity-30 transition duration-500`}></div>
       <div className="relative bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 rounded-3xl p-8 shadow-2xl overflow-hidden">
         
