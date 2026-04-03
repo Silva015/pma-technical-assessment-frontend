@@ -1,37 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PMA Technical Assessment - Weather App 🌦️
 
-## Getting Started
+A premium, modern weather application built with Next.js (App Router), React, and Tailwind CSS. This application dynamically displays real-time weather conditions and a robust 5-day forecast based on your location or search query.
 
-First, run the development server:
+## 🌟 Features
+
+- **Real-Time Weather Data**: Get the latest current weather conditions, including temperature, humidity, visibility, pressure, and wind speed.
+- **5-Day Forecast**: View a dynamically generated grouping of weather over the next 5 days. Forecasts strictly respect the target city's actual timezones rather than the user's browser context.
+- **Interactive Search & Geolocation**: Seamlessly search by querying freely (e.g. city names, zip codes) or automatically use your browser's geolocation to grab immediate local weather context.
+- **Graceful Error Handling**: Elegant visual fallbacks implemented for location access denial, unknown search combinations, and network failures.
+- **API Proxy Routing & Caching**: External API requests run through secured Next.js API Routes (`app/api/weather/route.ts`). Responses are strictly optimized with `Cache-Control` (`stale-while-revalidate`), dramatically reducing OpenWeatherMap API limit-strikes.
+
+## 🚀 Getting Started
+
+### 1. Prerequisites
+
+Ensure you have [Node.js](https://nodejs.org/) (Version 18+) installed along with a package manager like `yarn` or `npm`.
+
+### 2. Install Project Dependencies
+
+*(Note: Node.js applications specify their requirements natively in the `package.json` config. You do not need a custom pip `requirements.txt` file).*
+
+To install everything automatically, run:
 
 ```bash
-npm run dev
+yarn install
 # or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Setup Environment Configuration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+In order to fetch weather data without exposing credentials to the client, you must provide your OpenWeatherMap API Key in the server scope.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a `.env.local` file at the root of the project and add your API key:
 
-## Learn More
+```env
+OPENWEATHER_API_KEY=your_api_key_here
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 4. Run the Development Server
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Start the interactive development server:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+yarn dev
+# or 
+npm run dev
+```
 
-## Deploy on Vercel
+The application will be immediately running on **[http://localhost:3000](http://localhost:3000)**! 
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# pma-technical-assessment-frontend
+## 📦 Requirements & Tech Stack Overview
+
+*(Detailed list of libraries configured in `package.json` that will be installed on `yarn install`)*
+
+**Framework & Core:**
+- [`next`](https://nextjs.org/) (v16.2.2) - The underlying React meta-framework.
+- [`react`](https://react.dev/) & [`react-dom`](https://react.dev/) (v19.2.4) - The core UI libraries.
+
+**Styling & UI Toolkit:**
+- [`tailwindcss`](https://tailwindcss.com/) (v4) - Atomic, utility-first CSS framework.
+- [`lucide-react`](https://lucide.dev/) - Beautiful, consistent icon pack.
+- [`clsx`](https://github.com/lukeed/clsx) & [`tailwind-merge`](https://github.com/dcastil/tailwind-merge) - Dynamic style combinations.
+- [`radix-ui`](https://www.radix-ui.com/) & `shadcn` - Headless primitives for stable accessible component foundations.
+
+**Linting & TypeScript:**
+- `typescript` (v5) - Statically typed configuration.
+- `eslint` - Javascript alignment standards.
