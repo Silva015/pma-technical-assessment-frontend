@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { SearchBar } from "../components/weather/SearchBar";
 import { WeatherDisplay } from "../components/weather/WeatherDisplay";
-import { WeatherData } from "../types/weather";
+import { ForecastDisplay } from "../components/weather/ForecastDisplay";
+import { WeatherData, ForecastData } from "../types/weather";
 import { CloudRain, AlertCircle } from "lucide-react";
 
 export default function Home() {
-  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [weatherData, setWeatherData] = useState<{ current: WeatherData; forecast: ForecastData } | null>(null);
   const [loading, setLoading] = useState(false);
   const [geolocating, setGeolocating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -94,7 +95,10 @@ export default function Home() {
         )}
 
         {weatherData && !loading && !geolocating && (
-          <WeatherDisplay data={weatherData} />
+          <div className="w-full flex flex-col gap-6">
+            <WeatherDisplay data={weatherData.current} />
+            <ForecastDisplay data={weatherData.forecast} />
+          </div>
         )}
       </main>
     </div>

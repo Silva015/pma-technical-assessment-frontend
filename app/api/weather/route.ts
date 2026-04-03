@@ -12,19 +12,37 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "API key is missing" }, { status: 500 });
   }
 
+  // Helper function to fetch both current weather and 5-day forecast
+  const fetchCombinedData = async (queryParams: string) => {
+    const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?${queryParams}&appid=${apiKey}&units=metric`;
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?${queryParams}&appid=${apiKey}&units=metric`;
+
+    const [weatherRes, forecastRes] = await Promise.all([
+      fetch(weatherUrl),
+      fetch(forecastUrl)
+    ]);
+
+    if (!weatherRes.ok) throw new Error("Location not found");
+    // Forecast failing is rare if weather succeeds, but we handle it just in case:
+    if (!forecastRes.ok) throw new Error("Forecast not available for this location");
+
+    const weatherData = await weatherRes.json();
+    const forecastData = await forecastRes.json();
+
+    return {
+      current: weatherData,
+      forecast: forecastData
+    };
+  };
+
   // 1. Direct coordinate search (Geolocation)
   if (lat && lon) {
     try {
-      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
-      const response = await fetch(apiUrl);
-      const data = await response.json();
-      if (!response.ok) {
-        return NextResponse.json({ error: data.message || "Failed to fetch weather data" }, { status: response.status });
-      }
+      const data = await fetchCombinedData(`lat=${lat}&lon=${lon}`);
       return NextResponse.json(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching weather by coords:", error);
-      return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+      return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
     }
   }
 
@@ -32,12 +50,11 @@ export async function GET(request: Request) {
   if (q) {
     try {
       // Try OpenWeatherMap direct geographic search first
-      const directUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(q)}&appid=${apiKey}&units=metric`;
-      const directRes = await fetch(directUrl);
-      
-      if (directRes.ok) {
-        const data = await directRes.json();
+      try {
+        const data = await fetchCombinedData(`q=${encodeURIComponent(q)}`);
         return NextResponse.json(data);
+      } catch (directError) {
+        // Continue to fallback if direct fetch fails
       }
 
       // If OWM fails (e.g., zip code, landmark), fallback to Nominatim
@@ -52,29 +69,26 @@ export async function GET(request: Request) {
           const geoLon = geoData[0].lon;
           const geoName = geoData[0].name || q; // Fallback name
           
-          const fallbackUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${geoLat}&lon=${geoLon}&appid=${apiKey}&units=metric`;
-          const fallbackRes = await fetch(fallbackUrl);
-          const fallbackData = await fallbackRes.json();
+          const fallbackData = await fetchCombinedData(`lat=${geoLat}&lon=${geoLon}`);
           
-          if (fallbackRes.ok) {
-            // OpenWeatherMap might return an empty name/country for coordinates, inject Nominatim info
-            if (!fallbackData.name) {
-              fallbackData.name = geoName;
-            }
-            if (!fallbackData.sys.country) {
-              fallbackData.sys.country = ""; 
-            }
-            return NextResponse.json(fallbackData);
+          // OpenWeatherMap might return an empty name/country for coordinates, inject Nominatim info
+          if (!fallbackData.current.name) {
+            fallbackData.current.name = geoName;
           }
+          if (!fallbackData.current.sys.country) {
+            fallbackData.current.sys.country = ""; 
+          }
+          
+          return NextResponse.json(fallbackData);
         }
       } catch (e) {
         console.warn("Geocoding failed, falling back to 404", e);
       }
 
       return NextResponse.json({ error: "Location not found" }, { status: 404 });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching weather by query:", error);
-      return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+      return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
     }
   }
 
