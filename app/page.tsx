@@ -1,5 +1,6 @@
 import { CloudRain } from "lucide-react";
 import { WeatherDashboard } from "@/components/weather/WeatherDashboard";
+import { AboutPMA } from "@/components/AboutPMA";
 
 export default function Home() {
 
@@ -25,6 +26,7 @@ export default function Home() {
         </div>
 
         <WeatherDashboard />
+        <AboutPMA />
       </main>
     </div>
   );
