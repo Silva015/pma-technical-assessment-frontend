@@ -5,7 +5,7 @@ import { SearchBar } from "../components/weather/SearchBar";
 import { WeatherDisplay } from "../components/weather/WeatherDisplay";
 import { ForecastDisplay } from "../components/weather/ForecastDisplay";
 import { WeatherData, ForecastData } from "../types/weather";
-import { CloudRain, AlertCircle } from "lucide-react";
+import { CloudRain, AlertCircle, MapPinOff, CloudOff, RefreshCcw } from "lucide-react";
 
 export default function Home() {
   const [weatherData, setWeatherData] = useState<{ current: WeatherData; forecast: ForecastData } | null>(null);
@@ -87,14 +87,49 @@ export default function Home() {
           />
         </div>
 
+        {/* Graceful Error Handling States */}
         {error && (
-          <div className="mt-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-2xl flex items-center gap-3 text-red-600 dark:text-red-400 animate-in fade-in slide-in-from-top-2">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
-            <p className="font-medium">{error}</p>
+          <div className="w-full max-w-md mx-auto mt-8 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="bg-white/60 dark:bg-zinc-900/60 backdrop-blur-md border border-red-200/50 dark:border-red-900/30 rounded-3xl p-6 shadow-xl text-center">
+              <div className="inline-flex items-center justify-center p-3 sm:p-4 bg-red-100 dark:bg-red-900/20 rounded-full mb-4 ring-1 ring-red-500/20">
+                {error.toLowerCase().includes("not found") ? (
+                  <MapPinOff className="w-6 h-6 sm:w-8 sm:h-8 text-red-500" />
+                ) : error.toLowerCase().includes("location") ? (
+                  <CloudOff className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500" />
+                ) : (
+                  <AlertCircle className="w-6 h-6 sm:w-8 sm:h-8 text-red-500" />
+                )}
+              </div>
+              
+              <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-2">
+                {error.toLowerCase().includes("not found") 
+                  ? "City Not Found" 
+                  : error.toLowerCase().includes("location")
+                  ? "Location Access Denied"
+                  : "Oops! Something went wrong"}
+              </h3>
+              
+              <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-6 px-4">
+                {error.toLowerCase().includes("not found")
+                  ? "We couldn't find the location you searched for. Please double-check the spelling or try a broader area."
+                  : error.toLowerCase().includes("denied") || error.toLowerCase().includes("unable")
+                  ? "We couldn't access your current location. Please ensure location services are enabled in your browser settings."
+                  : error}
+              </p>
+
+              <button 
+                onClick={() => setError(null)}
+                className="inline-flex items-center justify-center gap-2 px-6 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium rounded-full transition-colors text-sm"
+              >
+                <RefreshCcw className="w-4 h-4" />
+                Try Again
+              </button>
+            </div>
           </div>
         )}
 
-        {weatherData && !loading && !geolocating && (
+        {/* Successful Data Display */}
+        {weatherData && !loading && !geolocating && !error && (
           <div className="w-full flex flex-col gap-6">
             <WeatherDisplay data={weatherData.current} />
             <ForecastDisplay data={weatherData.forecast} />
